@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FeatureFlag {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  enabled       Boolean  @default(true)
+  killSwitch    Boolean  @default(false)
+  rollout       Int?
+  targetUsers   String[]
+  enableForAll  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  audits        AuditLog[]
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  flagId      String
+  actor       String
+  action      String
+  beforeState Json?
+  afterState  Json?
+  createdAt   DateTime @default(now())
+
+  flag FeatureFlag @relation(fields: [flagId], references: [id])
+}
